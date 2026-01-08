@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Modal, FlatList, TouchableOpacity, Image } from 'react-native';
-import styled from 'styled-components/native';
+import { View, Text, Modal, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Video } from 'expo-av';
 
 interface Highlight {
@@ -11,34 +10,6 @@ interface Highlight {
     video: string;
   };
 }
-
-const ViewerOverlay = styled.View`
-  flex: 1;
-  background-color: #000;
-`;
-
-const StoryContainer = styled.View`
-  flex: 1;
-  width: 100%;
-  height: 100%;
-`;
-
-const VideoPlayer = styled(Video)`
-  width: 100%;
-  height: 100%;
-`;
-
-const CloseButton = styled.TouchableOpacity`
-  position: absolute;
-  top: 40px;
-  right: 20px;
-  z-index: 1;
-`;
-
-const CloseText = styled.Text`
-  color: #fff;
-  font-size: 24px;
-`;
 
 const HighlightViewer = ({ highlights, startIndex, visible, onClose }: { highlights: Highlight[]; startIndex: number; visible: boolean; onClose: () => void }) => {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
@@ -51,15 +22,16 @@ const HighlightViewer = ({ highlights, startIndex, visible, onClose }: { highlig
   }, [visible, startIndex]);
 
   const renderItem = ({ item }: { item: Highlight }) => (
-    <StoryContainer>
-      <VideoPlayer
+    <View style={styles.storyContainer}>
+      <Video
         ref={videoRef}
+        style={styles.videoPlayer}
         source={{ uri: item.content.video }}
         shouldPlay
         isLooping
         resizeMode="cover"
       />
-    </StoryContainer>
+    </View>
   );
 
   return (
@@ -69,7 +41,7 @@ const HighlightViewer = ({ highlights, startIndex, visible, onClose }: { highlig
       visible={visible}
       onRequestClose={onClose}
     >
-      <ViewerOverlay>
+      <View style={styles.viewerOverlay}>
         <FlatList
           data={highlights}
           pagingEnabled
@@ -79,12 +51,38 @@ const HighlightViewer = ({ highlights, startIndex, visible, onClose }: { highlig
           keyExtractor={(item) => item._id}
           onScrollToIndexFailed={() => {}}
         />
-        <CloseButton onPress={onClose}>
-          <CloseText>X</CloseText>
-        </CloseButton>
-      </ViewerOverlay>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeText}>X</Text>
+        </TouchableOpacity>
+      </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  viewerOverlay: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  storyContainer: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  videoPlayer: {
+    width: '100%',
+    height: '100%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    zIndex: 1,
+  },
+  closeText: {
+    color: '#fff',
+    fontSize: 24,
+  },
+});
 
 export default HighlightViewer;
