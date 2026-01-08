@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
-import styled from 'styled-components/native';
 import axios from 'axios';
 import { RouteProp, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,96 +23,6 @@ interface Creator {
   content: any[];
   about: string;
 }
-
-const Container = styled.View`
-  flex: 1;
-  background-color: #000;
-`;
-
-const Banner = styled.Image`
-  width: 100%;
-  height: 200px;
-`;
-
-const ProfileContainer = styled.View`
-  flex-direction: row;
-  align-items: center;
-  padding: 20px;
-`;
-
-const ProfileImage = styled.Image`
-  width: 80px;
-  height: 80px;
-  border-radius: 40px;
-`;
-
-const ProfileInfo = styled.View`
-  margin-left: 20px;
-`;
-
-const CreatorName = styled.Text`
-  color: #fff;
-  font-size: 24px;
-  font-weight: bold;
-`;
-
-const SubscriberCount = styled.Text`
-  color: #fff;
-  font-size: 16px;
-`;
-
-const TabsContainer = styled.View`
-  flex-direction: row;
-  justify-content: space-around;
-  padding: 10px 20px;
-  border-bottom-width: 1px;
-  border-bottom-color: #333;
-`;
-
-const TabButton = styled.TouchableOpacity<{ isFocused: boolean; isActive: boolean }>`
-  padding: 10px;
-  border-bottom-width: 2px;
-  border-bottom-color: ${(props) => (props.isActive ? '#fff' : 'transparent')};
-  background-color: ${(props) => (props.isFocused ? '#555' : 'transparent')};
-`;
-
-const TabText = styled.Text`
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const ContentContainer = styled.View`
-  flex: 1;
-`;
-
-const VideosContainer = styled.View`
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const VideoCard = styled.View<{ isFocused: boolean }>`
-  margin-right: 10px;
-  border-width: 2px;
-  border-color: ${(props) => (props.isFocused ? '#fff' : 'transparent')};
-  transform: ${(props) => (props.isFocused ? 'scale(1.1)' : 'scale(1)')};
-`;
-
-const VideoThumbnail = styled.Image`
-  width: 160px;
-  height: 90px;
-`;
-
-const VideoTitle = styled.Text`
-  color: #fff;
-  width: 160px;
-`;
 
 type ChannelScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Channel'>;
 
@@ -146,17 +55,17 @@ const ChannelScreen = ({ route }: { route: ChannelScreenRouteProp }) => {
 
   if (error) {
     return (
-      <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </Container>
+      </View>
     );
   }
 
   if (!creator) {
     return (
-      <Container style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <Text style={{ color: '#fff' }}>Loading...</Text>
-      </Container>
+      </View>
     );
   }
 
@@ -164,8 +73,8 @@ const ChannelScreen = ({ route }: { route: ChannelScreenRouteProp }) => {
     switch (activeTab) {
       case 'VIDEOS':
         return (
-          <VideosContainer>
-            <SectionTitle>Videos</SectionTitle>
+          <View style={styles.videosContainer}>
+            <Text style={styles.sectionTitle}>Videos</Text>
             <FlatList
               data={creator?.content}
               horizontal
@@ -177,14 +86,14 @@ const ChannelScreen = ({ route }: { route: ChannelScreenRouteProp }) => {
                   onPress={() => navigation.navigate('Movie', { movieId: item._id })}
                   hasTVPreferredFocus={index === 0}
                 >
-                  <VideoCard isFocused={focusedVideoIndex === index}>
-                    <VideoThumbnail source={{ uri: item.thumbnail }} />
-                    <VideoTitle>{item.title}</VideoTitle>
-                  </VideoCard>
+                  <View style={[styles.videoCard, { borderColor: focusedVideoIndex === index ? '#fff' : 'transparent', transform: [{ scale: focusedVideoIndex === index ? 1.1 : 1 }] }]}>
+                    <Image source={{ uri: item.thumbnail }} style={styles.videoThumbnail} />
+                    <Text style={styles.videoTitle}>{item.title}</Text>
+                  </View>
                 </TouchableOpacity>
               )}
             />
-          </VideosContainer>
+          </View>
         );
       case 'FEEDS':
         return (
@@ -208,38 +117,110 @@ const ChannelScreen = ({ route }: { route: ChannelScreenRouteProp }) => {
   };
 
   return (
-    <Container>
-      <Banner source={{ uri: creator.bannerImage }} />
-      <ProfileContainer>
-        <ProfileImage source={{ uri: creator.profileImage }} />
-        <ProfileInfo>
-          <CreatorName>{creator.name}</CreatorName>
-          <SubscriberCount>{creator.subscribers} subscribers</SubscriberCount>
-        </ProfileInfo>
-      </ProfileContainer>
+    <View style={styles.container}>
+      <Image source={{ uri: creator.bannerImage }} style={styles.banner} />
+      <View style={styles.profileContainer}>
+        <Image source={{ uri: creator.profileImage }} style={styles.profileImage} />
+        <View style={styles.profileInfo}>
+          <Text style={styles.creatorName}>{creator.name}</Text>
+          <Text style={styles.subscriberCount}>{creator.subscribers} subscribers</Text>
+        </View>
+      </View>
       <HighlightsSection creatorId={creatorId} />
-      <TabsContainer>
+      <View style={styles.tabsContainer}>
         {TABS.map((tab) => (
-          <TabButton
+          <TouchableOpacity
             key={tab}
             onPress={() => setActiveTab(tab)}
             onFocus={() => setFocusedTab(tab)}
             onBlur={() => setFocusedTab('')}
-            isActive={activeTab === tab}
-            isFocused={focusedTab === tab}
+            style={[styles.tabButton, { borderBottomColor: activeTab === tab ? '#fff' : 'transparent', backgroundColor: focusedTab === tab ? '#555' : 'transparent' }]}
           >
-            <TabText>{tab}</TabText>
-          </TabButton>
+            <Text style={styles.tabText}>{tab}</Text>
+          </TouchableOpacity>
         ))}
-      </TabsContainer>
-      <ContentContainer>{renderContent()}</ContentContainer>
+      </View>
+      <View style={styles.contentContainer}>{renderContent()}</View>
       <FeedPostViewerModal
         post={selectedFeedPost}
         visible={isFeedModalVisible}
         onClose={() => setIsFeedModalVisible(false)}
       />
-    </Container>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  banner: {
+    width: '100%',
+    height: 200,
+  },
+  profileContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+  },
+  profileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  profileInfo: {
+    marginLeft: 20,
+  },
+  creatorName: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  subscriberCount: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  tabButton: {
+    padding: 10,
+    borderBottomWidth: 2,
+  },
+  tabText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  videosContainer: {
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  videoCard: {
+    marginRight: 10,
+    borderWidth: 2,
+  },
+  videoThumbnail: {
+    width: 160,
+    height: 90,
+  },
+  videoTitle: {
+    color: '#fff',
+    width: 160,
+  },
+});
 
 export default ChannelScreen;

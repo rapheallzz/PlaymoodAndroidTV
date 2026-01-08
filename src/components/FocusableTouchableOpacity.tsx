@@ -1,16 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { TouchableOpacity, TouchableOpacityProps, Animated, StyleProp, ViewStyle } from 'react-native';
-import styled from 'styled-components/native';
 
 interface FocusableTouchableOpacityProps extends TouchableOpacityProps {
   children: React.ReactNode;
 }
-
-// The styled component no longer needs to know about focus state.
-const StyledTouchableOpacity = styled(TouchableOpacity)`
-  border-width: 2px;
-  border-color: transparent; /* Set a default */
-`;
 
 const FocusableTouchableOpacity: React.FC<FocusableTouchableOpacityProps> = ({ children, style, ...props }) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -22,7 +15,6 @@ const FocusableTouchableOpacity: React.FC<FocusableTouchableOpacityProps> = ({ c
       toValue: 1.1,
       useNativeDriver: true,
     }).start();
-    // Forward the onFocus event if it exists
     props.onFocus?.(e);
   };
 
@@ -32,28 +24,26 @@ const FocusableTouchableOpacity: React.FC<FocusableTouchableOpacityProps> = ({ c
       toValue: 1,
       useNativeDriver: true,
     }).start();
-    // Forward the onBlur event if it exists
     props.onBlur?.(e);
   };
 
-  // Combine animated transform with conditional border color
-  // This is a more robust way to handle dynamic styles.
   const dynamicStyles: StyleProp<ViewStyle> = {
     borderColor: isFocused ? '#FFFFFF' : 'transparent',
     transform: [{ scale: scaleAnim }],
+    borderWidth: 2,
   };
 
   return (
-    <StyledTouchableOpacity
-      {...props}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      activeOpacity={0.8}
-      // Combine incoming styles with our dynamic styles
-      style={[style, dynamicStyles]}
-    >
-      {children}
-    </StyledTouchableOpacity>
+    <Animated.View style={[style, dynamicStyles]}>
+      <TouchableOpacity
+        {...props}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        activeOpacity={0.8}
+      >
+        {children}
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 

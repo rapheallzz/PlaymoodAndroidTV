@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, TouchableOpacity, Text } from 'react-native';
-import styled from 'styled-components/native';
+import { FlatList, TouchableOpacity, Text, View, Image, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -12,31 +11,6 @@ interface Creator {
   name: string;
   profileImage: string;
 }
-
-const SliderContainer = styled.View`
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const CreatorItemContainer = styled.View<{ isFocused: boolean }>`
-  border-radius: 50px;
-  border-width: 2px;
-  border-color: ${(props) => (props.isFocused ? '#fff' : 'transparent')};
-  margin-right: 15px;
-  transform: ${(props) => (props.isFocused ? 'scale(1.1)' : 'scale(1)')};
-`;
-
-const CreatorImage = styled.Image`
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-`;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -62,10 +36,10 @@ const ChannelSlider = () => {
 
   if (error) {
     return (
-      <SliderContainer>
-        <SectionTitle>Channels</SectionTitle>
+      <View style={styles.container}>
+        <Text style={styles.sectionTitle}>Channels</Text>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </SliderContainer>
+      </View>
     );
   }
 
@@ -74,18 +48,18 @@ const ChannelSlider = () => {
       onFocus={() => setFocusedIndex(index)}
       onBlur={() => setFocusedIndex(-1)}
       onPress={() => navigation.navigate('Channel', { creatorId: item._id })}
-      activeOpacity={0.8}
       hasTVPreferredFocus={index === 0}
+      activeOpacity={0.8}
     >
-      <CreatorItemContainer isFocused={focusedIndex === index}>
-        <CreatorImage source={{ uri: item.profileImage }} />
-      </CreatorItemContainer>
+      <View style={[styles.creatorItemContainer, { borderColor: focusedIndex === index ? '#fff' : 'transparent', transform: [{ scale: focusedIndex === index ? 1.1 : 1 }] }]}>
+        <Image source={{ uri: item.profileImage }} style={styles.creatorImage} />
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <SliderContainer>
-      <SectionTitle>Channels</SectionTitle>
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Channels</Text>
       <FlatList
         data={creators}
         horizontal
@@ -93,8 +67,30 @@ const ChannelSlider = () => {
         renderItem={renderItem}
         showsHorizontalScrollIndicator={false}
       />
-    </SliderContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  creatorItemContainer: {
+    borderRadius: 50,
+    borderWidth: 2,
+    marginRight: 15,
+  },
+  creatorImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+});
 
 export default ChannelSlider;

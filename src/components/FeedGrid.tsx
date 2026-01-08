@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import styled from 'styled-components/native';
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '../config/apiConfig';
 
@@ -11,37 +10,6 @@ interface FeedPost {
   likes: string[];
   comments: any[];
 }
-
-const FeedContainer = styled.View`
-  flex: 1;
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const PostItemContainer = styled.View<{ isFocused: boolean }>`
-  flex: 1;
-  margin: 5px;
-  border-width: 2px;
-  border-color: ${(props) => (props.isFocused ? '#fff' : 'transparent')};
-  transform: ${(props) => (props.isFocused ? 'scale(1.1)' : 'scale(1)')};
-`;
-
-const PostImage = styled.Image`
-  width: 100%;
-  aspect-ratio: 1;
-`;
-
-const NoPostsMessage = styled.Text`
-  color: #fff;
-  text-align: center;
-  margin-top: 20px;
-`;
 
 const FeedGrid = ({ creatorId, onPostClick }: { creatorId: string; onPostClick: (post: FeedPost) => void }) => {
   const [feeds, setFeeds] = useState<FeedPost[]>([]);
@@ -65,44 +33,75 @@ const FeedGrid = ({ creatorId, onPostClick }: { creatorId: string; onPostClick: 
 
   if (error) {
     return (
-      <FeedContainer>
-        <SectionTitle>Feeds</SectionTitle>
+      <View style={styles.container}>
+        <Text style={styles.sectionTitle}>Feeds</Text>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </FeedContainer>
+      </View>
     );
   }
 
   if (feeds.length === 0) {
-    return <NoPostsMessage>No feed posts yet.</NoPostsMessage>;
+    return <Text style={styles.noPostsMessage}>No feed posts yet.</Text>;
   }
 
   const renderItem = ({ item, index }: { item: FeedPost; index: number }) => (
     <TouchableOpacity
-      style={{ flex: 1 / 3, margin: 1 }}
+      style={styles.postItem}
       onFocus={() => setFocusedIndex(index)}
       onBlur={() => setFocusedIndex(-1)}
       onPress={() => onPostClick(item)}
       hasTVPreferredFocus={index === 0}
     >
-      <PostItemContainer isFocused={focusedIndex === index}>
+      <View style={[styles.postItemContainer, { borderColor: focusedIndex === index ? '#fff' : 'transparent', transform: [{ scale: focusedIndex === index ? 1.1 : 1 }] }]}>
         {item.media && item.media.length > 0 && (
-          <PostImage source={{ uri: item.media[0].url }} />
+          <Image source={{ uri: item.media[0].url }} style={styles.postImage} />
         )}
-      </PostItemContainer>
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <FeedContainer>
-      <SectionTitle>Feeds</SectionTitle>
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Feeds</Text>
       <FlatList
         data={feeds}
         numColumns={3}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
       />
-    </FeedContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  postItem: {
+    flex: 1 / 3,
+    margin: 1,
+  },
+  postItemContainer: {
+    flex: 1,
+    margin: 5,
+    borderWidth: 2,
+  },
+  postImage: {
+    width: '100%',
+    aspectRatio: 1,
+  },
+  noPostsMessage: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
 
 export default FeedGrid;

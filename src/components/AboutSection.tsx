@@ -1,31 +1,30 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import styled from 'styled-components/native';
-
-const AboutContainer = styled.View`
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const AboutText = styled.Text`
-  color: #fff;
-  font-size: 16px;
-  line-height: 24px;
-`;
+import { View, Text, StyleSheet } from 'react-native';
 
 const AboutSection = ({ about }: { about: string }) => {
   return (
-    <AboutContainer>
-      <SectionTitle>About</SectionTitle>
-      <AboutText>{about}</AboutText>
-    </AboutContainer>
+    <View style={styles.aboutContainer}>
+      <Text style={styles.sectionTitle}>About</Text>
+      <Text style={styles.aboutText}>{about}</Text>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  aboutContainer: {
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  aboutText: {
+    color: '#fff',
+    fontSize: 16,
+    lineHeight: 24,
+  },
+});
 
 export default AboutSection;

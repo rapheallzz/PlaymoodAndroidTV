@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
-import styled from 'styled-components/native';
+import { View, Text, ActivityIndicator, StyleSheet, ScrollView } from 'react-native';
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '../config/apiConfig';
 import { useSelector, useDispatch } from 'react-redux';
@@ -9,56 +8,6 @@ import { likeContent, unlikeContent, addToWatchlist, removeFromWatchlist } from 
 import FocusableTouchableOpacity from '../components/FocusableTouchableOpacity';
 import { Video } from 'expo-av';
 
-// --- Styled Components ---
-const Container = styled.ScrollView`
-  flex: 1;
-  background-color: #000;
-`;
-
-const LoaderContainer = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-`;
-
-const VideoContainer = styled.View`
-  width: 100%;
-  aspect-ratio: 16 / 9;
-`;
-
-const StyledVideo = styled(Video)`
-  width: 100%;
-  height: 100%;
-`;
-
-const DetailsContainer = styled.View`
-  padding: 20px;
-`;
-
-const Title = styled.Text`
-  font-size: 28px;
-  color: #fff;
-  font-weight: bold;
-`;
-
-const Description = styled.Text`
-  font-size: 16px;
-  color: #ccc;
-  margin-top: 10px;
-`;
-
-const ButtonContainer = styled.View`
-  flex-direction: row;
-  margin-top: 20px;
-`;
-
-const ButtonText = styled.Text`
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-// --- Interfaces ---
 interface Content {
   _id: string;
   title: string;
@@ -66,7 +15,6 @@ interface Content {
   video: string;
 }
 
-// --- Component ---
 const MovieScreen = ({ route }: { route: any }) => {
   const { contentId } = route.params;
   const [content, setContent] = useState<Content | null>(null);
@@ -116,17 +64,17 @@ const MovieScreen = ({ route }: { route: any }) => {
 
   if (loading) {
     return (
-      <LoaderContainer>
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#fff" />
-      </LoaderContainer>
+      </View>
     );
   }
 
   if (!content) {
     return (
-      <LoaderContainer>
+      <View style={styles.loaderContainer}>
         <Text style={{ color: '#fff' }}>Content not found.</Text>
-      </LoaderContainer>
+      </View>
     );
   }
 
@@ -134,38 +82,86 @@ const MovieScreen = ({ route }: { route: any }) => {
   const isInWatchlist = user?.watchlist?.includes(content._id);
 
   return (
-    <Container>
-      <VideoContainer>
-        <StyledVideo
+    <ScrollView style={styles.container}>
+      <View style={styles.videoContainer}>
+        <Video
           ref={videoRef}
+          style={styles.video}
           source={{ uri: content.video }}
           shouldPlay
           resizeMode="cover"
           useNativeControls
         />
-      </VideoContainer>
-      <DetailsContainer>
-        <Title>{content.title}</Title>
-        <Description>{content.description}</Description>
-        <ButtonContainer>
+      </View>
+      <View style={styles.detailsContainer}>
+        <Text style={styles.title}>{content.title}</Text>
+        <Text style={styles.description}>{content.description}</Text>
+        <View style={styles.buttonContainer}>
            <FocusableTouchableOpacity onPress={handleLike}>
-              <View style={{ padding: 15, backgroundColor: 'rgba(128, 128, 128, 0.5)', borderRadius: 5, marginRight: 15 }}>
-                <ButtonText>
+              <View style={[styles.button, { marginRight: 15 }]}>
+                <Text style={styles.buttonText}>
                   {isLiked ? 'UNLIKE' : 'LIKE'}
-                </ButtonText>
+                </Text>
               </View>
             </FocusableTouchableOpacity>
             <FocusableTouchableOpacity onPress={handleWatchlist}>
-               <View style={{ padding: 15, backgroundColor: 'rgba(128, 128, 128, 0.5)', borderRadius: 5 }}>
-                <ButtonText>
+               <View style={styles.button}>
+                <Text style={styles.buttonText}>
                   {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
-                </ButtonText>
+                </Text>
               </View>
             </FocusableTouchableOpacity>
-        </ButtonContainer>
-      </DetailsContainer>
-    </Container>
+        </View>
+      </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  videoContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+  },
+  video: {
+    width: '100%',
+    height: '100%',
+  },
+  detailsContainer: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 28,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  description: {
+    fontSize: 16,
+    color: '#ccc',
+    marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+  },
+  button: {
+    padding: 15,
+    backgroundColor: 'rgba(128, 128, 128, 0.5)',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
 
 export default MovieScreen;

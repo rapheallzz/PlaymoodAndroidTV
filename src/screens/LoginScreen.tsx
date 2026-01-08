@@ -1,63 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ActivityIndicator, Image, StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/native';
 import { login, reset } from '../features/authSlice';
 import { AppDispatch, RootState } from '../app/store';
 import FocusableTouchableOpacity from '../components/FocusableTouchableOpacity';
-
-const Container = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  background-color: #000;
-`;
-
-const Logo = styled.Image`
-  width: 200px;
-  height: 100px;
-  resize-mode: contain;
-  margin-bottom: 40px;
-`;
-
-const Form = styled.View`
-  width: 400px;
-  padding: 20px;
-  background-color: #1a1a1a;
-  border-radius: 8px;
-`;
-
-const Title = styled.Text`
-  font-size: 28px;
-  color: #fff;
-  text-align: center;
-  margin-bottom: 20px;
-`;
-
-// The styled component no longer needs to know about focus state.
-const StyledInput = styled.TextInput`
-  height: 50px;
-  background-color: #333;
-  color: #fff;
-  padding: 0 15px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  font-size: 16px;
-  border-width: 2px;
-  border-color: #333; /* Set a default */
-`;
-
-const ButtonText = styled.Text`
-  color: #fff;
-  font-size: 18px;
-  text-align: center;
-`;
-
-const ErrorText = styled.Text`
-  color: #ff4d4d;
-  text-align: center;
-  margin-top: 10px;
-`;
 
 const LoginScreen = ({ navigation }: { navigation: any }) => {
   const [email, setEmail] = useState('');
@@ -87,7 +33,6 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  // Dynamic styles for the inputs
   const emailInputStyle = {
     borderColor: emailFocused ? '#fff' : '#333',
   };
@@ -97,22 +42,23 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
   };
 
   return (
-    <Container>
-      <Logo source={require('../../assets/playmood_logo.png')} />
-      <Form>
-        <Title>Login</Title>
-        <StyledInput
+    <View style={styles.container}>
+      <Image style={styles.logo} source={require('../../assets/playmood_logo.png')} />
+      <View style={styles.form}>
+        <Text style={styles.title}>Login</Text>
+        <TextInput
+          style={[styles.input, emailInputStyle]}
           placeholder="Email"
           placeholderTextColor="#888"
           value={email}
           onChangeText={setEmail}
           onFocus={() => setEmailFocused(true)}
           onBlur={() => setEmailFocused(false)}
-          style={emailInputStyle}
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <StyledInput
+        <TextInput
+          style={[styles.input, passwordInputStyle]}
           placeholder="Password"
           placeholderTextColor="#888"
           value={password}
@@ -120,21 +66,72 @@ const LoginScreen = ({ navigation }: { navigation: any }) => {
           secureTextEntry
           onFocus={() => setPasswordFocused(true)}
           onBlur={() => setPasswordFocused(false)}
-          style={passwordInputStyle}
         />
         <FocusableTouchableOpacity onPress={handleLogin} disabled={isLoading}>
-          {isLoading ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <View style={{ padding: 15, backgroundColor: '#541011', borderRadius: 5 }}>
-              <ButtonText>Login</ButtonText>
-            </View>
-          )}
+          <View style={styles.button}>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Login</Text>
+            )}
+          </View>
         </FocusableTouchableOpacity>
-        {isError && <ErrorText>{message}</ErrorText>}
-      </Form>
-    </Container>
+        {isError && <Text style={styles.errorText}>{message}</Text>}
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  logo: {
+    width: 200,
+    height: 100,
+    resizeMode: 'contain',
+    marginBottom: 40,
+  },
+  form: {
+    width: 400,
+    padding: 20,
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+  },
+  title: {
+    fontSize: 28,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  input: {
+    height: 50,
+    backgroundColor: '#333',
+    color: '#fff',
+    paddingHorizontal: 15,
+    borderRadius: 5,
+    marginBottom: 15,
+    fontSize: 16,
+    borderWidth: 2,
+  },
+  button: {
+    padding: 15,
+    backgroundColor: '#541011',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+  },
+  errorText: {
+    color: '#ff4d4d',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+});
 
 export default LoginScreen;

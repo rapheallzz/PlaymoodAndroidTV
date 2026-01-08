@@ -1,8 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { View, Text, Image, Modal, TouchableOpacity, StyleSheet } from 'react-native';
-import styled from 'styled-components/native';
-import { useSelector } from 'react-redux';
-import { RootState } from '../app/store';
 
 interface FeedPost {
   _id: string;
@@ -16,72 +13,6 @@ interface FeedPost {
   };
 }
 
-const ModalOverlay = styled.View`
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
-`;
-
-const ModalCard = styled.View`
-  width: 90%;
-  height: 90%;
-  background-color: #1a1a1a;
-  border-radius: 8px;
-  flex-direction: row;
-`;
-
-const MediaContainer = styled.View`
-  flex: 1;
-`;
-
-const MediaImage = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-`;
-
-const ContentContainer = styled.View`
-  flex: 1;
-  padding: 20px;
-`;
-
-const Header = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const ProfileImage = styled.Image`
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-`;
-
-const CreatorName = styled.Text`
-  color: #fff;
-  font-size: 16px;
-  margin-left: 10px;
-`;
-
-const Caption = styled.Text`
-  color: #fff;
-  margin-bottom: 20px;
-`;
-
-const CloseButton = styled.TouchableOpacity`
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 1;
-`;
-
-const CloseText = styled.Text`
-  color: #fff;
-  font-size: 24px;
-`;
-
 const FeedPostViewerModal = ({ post, visible, onClose }: { post: FeedPost | null; visible: boolean; onClose: () => void }) => {
   if (!post) {
     return null;
@@ -94,28 +25,85 @@ const FeedPostViewerModal = ({ post, visible, onClose }: { post: FeedPost | null
       visible={visible}
       onRequestClose={onClose}
     >
-      <ModalOverlay>
-        <ModalCard>
-          <MediaContainer>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalCard}>
+          <View style={styles.mediaContainer}>
             {post.media && post.media.length > 0 && (
-              <MediaImage source={{ uri: post.media[0].url }} />
+              <Image source={{ uri: post.media[0].url }} style={styles.mediaImage} />
             )}
-          </MediaContainer>
-          <ContentContainer>
-            <Header>
-              <ProfileImage source={{ uri: post.user?.profileImage }} />
-              <CreatorName>{post.user?.name}</CreatorName>
-            </Header>
-            <Caption>{post.caption}</Caption>
-            {/* Comments and other actions can be added here */}
-          </ContentContainer>
-        </ModalCard>
-        <CloseButton onPress={onClose}>
-          <CloseText>X</CloseText>
-        </CloseButton>
-      </ModalOverlay>
+          </View>
+          <View style={styles.contentContainer}>
+            <View style={styles.header}>
+              <Image source={{ uri: post.user?.profileImage }} style={styles.profileImage} />
+              <Text style={styles.creatorName}>{post.user?.name}</Text>
+            </View>
+            <Text style={styles.caption}>{post.caption}</Text>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <Text style={styles.closeText}>X</Text>
+        </TouchableOpacity>
+      </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  modalCard: {
+    width: '90%',
+    height: '90%',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 8,
+    flexDirection: 'row',
+  },
+  mediaContainer: {
+    flex: 1,
+  },
+  mediaImage: {
+    width: '100%',
+    height: '100%',
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  creatorName: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  caption: {
+    color: '#fff',
+    marginBottom: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    zIndex: 1,
+  },
+  closeText: {
+    color: '#fff',
+    fontSize: 24,
+  },
+});
 
 export default FeedPostViewerModal;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import styled from 'styled-components/native';
+import { View, Text, ScrollView, StyleSheet, Image } from 'react-native';
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '../config/apiConfig';
 
@@ -24,79 +23,6 @@ interface CommunityPost {
   timestamp: string;
 }
 
-const CommunityContainer = styled.ScrollView`
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const PostCard = styled.View`
-  background-color: #1a1a1a;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-`;
-
-const PostHeader = styled.View`
-  flex-direction: row;
-  align-items: center;
-  margin-bottom: 10px;
-`;
-
-const ProfileImage = styled.Image`
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  margin-right: 10px;
-`;
-
-const PostCreator = styled.Text`
-  color: #fff;
-  font-weight: bold;
-`;
-
-const PostTimestamp = styled.Text`
-  color: #aaa;
-  font-size: 12px;
-`;
-
-const PostContent = styled.Text`
-  color: #fff;
-  margin-bottom: 10px;
-`;
-
-const CommentsContainer = styled.View`
-  margin-top: 10px;
-`;
-
-const CommentCard = styled.View`
-  background-color: #2b2b2b;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 5px;
-`;
-
-const CommentUser = styled.Text`
-  color: #fff;
-  font-weight: bold;
-`;
-
-const CommentText = styled.Text`
-  color: #ddd;
-`;
-
-const NoPostsMessage = styled.Text`
-  color: #fff;
-  text-align: center;
-  margin-top: 20px;
-`;
-
-
 const CommunitySection = ({ creatorId }: { creatorId: string }) => {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +33,7 @@ const CommunitySection = ({ creatorId }: { creatorId: string }) => {
       try {
         const response = await axios.get(`${EXPO_PUBLIC_API_URL}/api/community/${creatorId}`);
         setPosts(response.data);
-      } catch (err) {
+      } catch (err: any) {
         if (err.response?.status === 404) {
           setPosts([]);
         } else {
@@ -122,41 +48,103 @@ const CommunitySection = ({ creatorId }: { creatorId: string }) => {
 
   if (error) {
     return (
-      <CommunityContainer>
+      <View style={styles.container}>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </CommunityContainer>
+      </View>
     );
   }
 
   if (posts.length === 0) {
-    return <NoPostsMessage>No community posts available.</NoPostsMessage>;
+    return <Text style={styles.noPostsMessage}>No community posts available.</Text>;
   }
 
   return (
-    <CommunityContainer>
-      <SectionTitle>Community</SectionTitle>
+    <ScrollView style={styles.container}>
+      <Text style={styles.sectionTitle}>Community</Text>
       {posts.map((post) => (
-        <PostCard key={post._id}>
-          <PostHeader>
-            <ProfileImage source={{ uri: post.user.profileImage }} />
+        <View key={post._id} style={styles.postCard}>
+          <View style={styles.postHeader}>
+            <Image source={{ uri: post.user.profileImage }} style={styles.profileImage} />
             <View>
-              <PostCreator>{post.user.name}</PostCreator>
-              <PostTimestamp>{new Date(post.timestamp).toLocaleDateString()}</PostTimestamp>
+              <Text style={styles.postCreator}>{post.user.name}</Text>
+              <Text style={styles.postTimestamp}>{new Date(post.timestamp).toLocaleDateString()}</Text>
             </View>
-          </PostHeader>
-          <PostContent>{post.content}</PostContent>
-          <CommentsContainer>
+          </View>
+          <Text style={styles.postContent}>{post.content}</Text>
+          <View style={styles.commentsContainer}>
             {post.comments && post.comments.map((comment) => (
-              <CommentCard key={comment._id}>
-                <CommentUser>{comment.user.name}</CommentUser>
-                <CommentText>{comment.text}</CommentText>
-              </CommentCard>
+              <View key={comment._id} style={styles.commentCard}>
+                <Text style={styles.commentUser}>{comment.user.name}</Text>
+                <Text style={styles.commentText}>{comment.text}</Text>
+              </View>
             ))}
-          </CommentsContainer>
-        </PostCard>
+          </View>
+        </View>
       ))}
-    </CommunityContainer>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  postCard: {
+    backgroundColor: '#1a1a1a',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 15,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  postCreator: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  postTimestamp: {
+    color: '#aaa',
+    fontSize: 12,
+  },
+  postContent: {
+    color: '#fff',
+    marginBottom: 10,
+  },
+  commentsContainer: {
+    marginTop: 10,
+  },
+  commentCard: {
+    backgroundColor: '#2b2b2b',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 5,
+  },
+  commentUser: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  commentText: {
+    color: '#ddd',
+  },
+  noPostsMessage: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+});
 
 export default CommunitySection;

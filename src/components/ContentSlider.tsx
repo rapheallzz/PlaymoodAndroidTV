@@ -1,9 +1,7 @@
 import React from 'react';
-import { FlatList, View } from 'react-native';
-import styled from 'styled-components/native';
+import { FlatList, View, Text, StyleSheet, Image } from 'react-native';
 import FocusableTouchableOpacity from './FocusableTouchableOpacity';
 
-// --- Interfaces ---
 interface Content {
   _id: string;
   thumbnail: string;
@@ -15,51 +13,48 @@ interface ContentSliderProps {
   onPressItem: (item: Content) => void;
 }
 
-// --- Styled Components ---
-const SliderContainer = styled.View`
-  padding: 20px 0;
-`;
-
-const SliderTitle = styled.Text`
-  font-size: 24px;
-  color: #fff;
-  font-weight: bold;
-  margin-bottom: 15px;
-  padding-left: 20px;
-`;
-
-const MovieCard = styled.View`
-  width: 200px;
-  height: 300px;
-  margin-right: 15px;
-`;
-
-const MovieThumbnail = styled.Image`
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-`;
-
-// --- Component ---
 const ContentSlider: React.FC<ContentSliderProps> = ({ title, data, onPressItem }) => {
   return (
-    <SliderContainer>
-      <SliderTitle>{title}</SliderTitle>
+    <View style={styles.sliderContainer}>
+      <Text style={styles.sliderTitle}>{title}</Text>
       <FlatList
         horizontal
         data={data}
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <FocusableTouchableOpacity onPress={() => onPressItem(item)}>
-            <MovieCard>
-              <MovieThumbnail source={{ uri: item.thumbnail }} />
-            </MovieCard>
+            <View style={styles.movieCard}>
+              <Image source={{ uri: item.thumbnail }} style={styles.movieThumbnail} />
+            </View>
           </FocusableTouchableOpacity>
         )}
         contentContainerStyle={{ paddingLeft: 20 }}
       />
-    </SliderContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  sliderContainer: {
+    paddingVertical: 20,
+  },
+  sliderTitle: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 15,
+    paddingLeft: 20,
+  },
+  movieCard: {
+    width: 200,
+    height: 300,
+    marginRight: 15,
+  },
+  movieThumbnail: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+});
 
 export default ContentSlider;

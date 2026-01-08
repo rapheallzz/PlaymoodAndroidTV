@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
-import styled from 'styled-components/native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '../config/apiConfig';
 import HighlightViewer from './HighlightViewer';
@@ -13,31 +12,6 @@ interface Highlight {
     thumbnail: string;
   };
 }
-
-const HighlightsContainer = styled.View`
-  padding: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const HighlightItemContainer = styled.View<{ isFocused: boolean }>`
-  border-radius: 50px;
-  border-width: 2px;
-  border-color: ${(props) => (props.isFocused ? '#fff' : 'transparent')};
-  margin-right: 15px;
-  transform: ${(props) => (props.isFocused ? 'scale(1.1)' : 'scale(1)')};
-`;
-
-const HighlightImage = styled.Image`
-  width: 100px;
-  height: 100px;
-  border-radius: 50px;
-`;
 
 const HighlightsSection = ({ creatorId }: { creatorId: string }) => {
   const [highlights, setHighlights] = useState<Highlight[]>([]);
@@ -63,15 +37,15 @@ const HighlightsSection = ({ creatorId }: { creatorId: string }) => {
 
   if (error) {
     return (
-      <HighlightsContainer>
-        <SectionTitle>Highlights</SectionTitle>
+      <View style={styles.container}>
+        <Text style={styles.sectionTitle}>Highlights</Text>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </HighlightsContainer>
+      </View>
     );
   }
 
   if (highlights.length === 0) {
-    return null; // Don't show the section if there are no highlights
+    return null;
   }
 
   const openViewer = (index: number) => {
@@ -86,16 +60,16 @@ const HighlightsSection = ({ creatorId }: { creatorId: string }) => {
       onPress={() => openViewer(index)}
       hasTVPreferredFocus={index === 0}
     >
-      <HighlightItemContainer isFocused={focusedIndex === index}>
-        <HighlightImage source={{ uri: item.content.thumbnail }} />
-      </HighlightItemContainer>
+      <View style={[styles.highlightItemContainer, { borderColor: focusedIndex === index ? '#fff' : 'transparent', transform: [{ scale: focusedIndex === index ? 1.1 : 1 }] }]}>
+        <Image source={{ uri: item.content.thumbnail }} style={styles.highlightImage} />
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <>
-      <HighlightsContainer>
-        <SectionTitle>Highlights</SectionTitle>
+      <View style={styles.container}>
+        <Text style={styles.sectionTitle}>Highlights</Text>
         <FlatList
           data={highlights}
           horizontal
@@ -103,7 +77,7 @@ const HighlightsSection = ({ creatorId }: { creatorId: string }) => {
           renderItem={renderItem}
           showsHorizontalScrollIndicator={false}
         />
-      </HighlightsContainer>
+      </View>
       {viewerVisible && (
         <HighlightViewer
           highlights={highlights}
@@ -115,5 +89,27 @@ const HighlightsSection = ({ creatorId }: { creatorId: string }) => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  highlightItemContainer: {
+    borderRadius: 50,
+    borderWidth: 2,
+    marginRight: 15,
+  },
+  highlightImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+});
 
 export default HighlightsSection;

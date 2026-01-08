@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
-import styled from 'styled-components/native';
+import { View, Text, FlatList, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import axios from 'axios';
 import { EXPO_PUBLIC_API_URL } from '../config/apiConfig';
 import { useNavigation } from '@react-navigation/native';
@@ -18,38 +17,6 @@ interface Playlist {
   name: string;
   videos: Video[];
 }
-
-const PlaylistsContainer = styled.View`
-  padding: 20px;
-`;
-
-const PlaylistContainer = styled.View`
-  margin-bottom: 20px;
-`;
-
-const SectionTitle = styled.Text`
-  color: #fff;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const VideoCard = styled.View<{ isFocused: boolean }>`
-  margin-right: 10px;
-  border-width: 2px;
-  border-color: ${(props) => (props.isFocused ? '#fff' : 'transparent')};
-  transform: ${(props) => (props.isFocused ? 'scale(1.1)' : 'scale(1)')};
-`;
-
-const VideoThumbnail = styled.Image`
-  width: 160px;
-  height: 90px;
-`;
-
-const VideoTitle = styled.Text`
-  color: #fff;
-  width: 160px;
-`;
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Channel'>;
 
@@ -76,17 +43,17 @@ const PlaylistsSection = ({ creatorId }: { creatorId: string }) => {
 
   if (error) {
     return (
-      <PlaylistsContainer>
+      <View style={styles.container}>
         <Text style={{ color: 'red' }}>{error}</Text>
-      </PlaylistsContainer>
+      </View>
     );
   }
 
   if (playlists.length === 0) {
     return (
-      <PlaylistsContainer>
+      <View style={styles.container}>
         <Text style={{ color: '#fff' }}>No public playlists available.</Text>
-      </PlaylistsContainer>
+      </View>
     );
   }
 
@@ -101,18 +68,18 @@ const PlaylistsSection = ({ creatorId }: { creatorId: string }) => {
       onPress={() => navigation.navigate('Movie', { movieId: item._id })}
       hasTVPreferredFocus={index === 0}
     >
-      <VideoCard isFocused={focusedStates[playlistId] === index}>
-        <VideoThumbnail source={{ uri: item.thumbnail }} />
-        <VideoTitle>{item.title}</VideoTitle>
-      </VideoCard>
+      <View style={[styles.videoCard, { borderColor: focusedStates[playlistId] === index ? '#fff' : 'transparent', transform: [{ scale: focusedStates[playlistId] === index ? 1.1 : 1 }] }]}>
+        <Image source={{ uri: item.thumbnail }} style={styles.videoThumbnail} />
+        <Text style={styles.videoTitle}>{item.title}</Text>
+      </View>
     </TouchableOpacity>
   );
 
   return (
-    <PlaylistsContainer>
+    <View style={styles.container}>
       {playlists.map((playlist) => (
-        <PlaylistContainer key={playlist._id}>
-          <SectionTitle>{playlist.name}</SectionTitle>
+        <View key={playlist._id} style={styles.playlistContainer}>
+          <Text style={styles.sectionTitle}>{playlist.name}</Text>
           <FlatList
             data={playlist.videos}
             horizontal
@@ -120,10 +87,37 @@ const PlaylistsSection = ({ creatorId }: { creatorId: string }) => {
             renderItem={renderVideo(playlist._id)}
             showsHorizontalScrollIndicator={false}
           />
-        </PlaylistContainer>
+        </View>
       ))}
-    </PlaylistsContainer>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+  },
+  playlistContainer: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  videoCard: {
+    marginRight: 10,
+    borderWidth: 2,
+  },
+  videoThumbnail: {
+    width: 160,
+    height: 90,
+  },
+  videoTitle: {
+    color: '#fff',
+    width: 160,
+  },
+});
 
 export default PlaylistsSection;
